@@ -4,6 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+/**
+ * The ExpenseTrackerModel class represents the data model for the Expense Tracker application.
+ * It manages the transactions, filters, and notifies observers about state changes.
+ *
+ * This class follows the Observer design pattern, acting as the Observable in the MVC architecture.
+ * It holds transaction data and filter indices, and notifies registered views whenever the data is updated.
+ */
+
 public class ExpenseTrackerModel {
 
   //encapsulation - data integrity
@@ -26,12 +34,14 @@ public class ExpenseTrackerModel {
     transactions.add(t);
     // The previous filter is no longer valid.
     matchedFilterIndices.clear();
+    stateChanged(); // Notify observers of the change
   }
 
   public void removeTransaction(Transaction t) {
     transactions.remove(t);
     // The previous filter is no longer valid.
     matchedFilterIndices.clear();
+    stateChanged(); // Notify observers of the change
   }
 
   public List<Transaction> getTransactions() {
@@ -52,6 +62,7 @@ public class ExpenseTrackerModel {
       // For encapsulation, copy in the input list 
       this.matchedFilterIndices.clear();
       this.matchedFilterIndices.addAll(newMatchedFilterIndices);
+      stateChanged(); // Notify observers of the change
   }
 
   public List<Integer> getMatchedFilterIndices() {
@@ -69,30 +80,76 @@ public class ExpenseTrackerModel {
    * @return If the listener is non-null and not already registered,
    *         returns true. If not, returns false.
    */   
+  private List<ExpenseTrackerModelListener> listeners = new ArrayList<>();
+
+  /**
+     * Registers the given listener for state change events.
+     *
+     * @param listener The ExpenseTrackerModelListener to be registered.
+     * @return true if the listener is non-null and not already registered, false otherwise.
+     */
+
+
   public boolean register(ExpenseTrackerModelListener listener) {
       // For the Observable class, this is one of the methods.
       //
       // TODO
-      return false;
+      
+
+      if (listener == null || listeners.contains(listener)) {
+        // Listener is null or already registered, so registration is not successful.
+        return false;
+    }
+    // Listener is non-null and not already registered, so add to the list.
+    listeners.add(listener);
+    // Registration was successful.
+    return true;
   }
+
+  /**
+     * Returns the number of registered listeners.
+     *
+     * @return the number of registered listeners.
+     */
 
   public int numberOfListeners() {
       // For testing, this is one of the methods.
       //
       //TODO
+      // Return the number of registered listeners
+      if (listeners.size()!=0)
+      {
+        return listeners.size();
+      }
       return 0;
   }
+
+   /**
+     * Checks if the specified listener is already registered.
+     *
+     * @param listener The listener to check.
+     * @return true if the listener is already registered, false otherwise.
+     */
 
   public boolean containsListener(ExpenseTrackerModelListener listener) {
       // For testing, this is one of the methods.
       //
       //TODO
-      return false;
+      return listeners.contains(listener);
+      //return false;
   }
 
+  /**
+     * Notifies all registered listeners of a state change.
+     */
+    
   protected void stateChanged() {
       // For the Observable class, this is one of the methods.
       //
       //TODO
+      // Notify all registered listeners of the state change
+      for (ExpenseTrackerModelListener listener : listeners) {
+        listener.update(this);
+    }
   }
 }
